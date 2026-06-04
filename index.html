@@ -194,6 +194,21 @@ textarea.form-control{resize:vertical;min-height:80px}
 .module-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
 .module-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
 .module-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.search-bar{display:flex;gap:8px;flex:1;min-width:250px}
+.search-bar input{flex:1;padding:8px 12px;border:2px solid var(--gray200);border-radius:8px;font-size:13px}
+.search-bar input:focus{border-color:var(--orange)}
+.bc-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.bc-table th{padding:8px;background:var(--gray50);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);border-bottom:2px solid var(--gray200)}
+.bc-table td{padding:8px;border-bottom:1px solid var(--gray100)}
+.bc-table input,.bc-table select{padding:4px 6px;border:1px solid var(--gray200);border-radius:6px;width:100%;font-size:11px}
+.bc-table input:focus,.bc-table select:focus{border-color:var(--orange);outline:none}
+.bc-total-row{font-weight:700;background:var(--gray50)}
+.bc-totals{margin-top:16px;display:flex;justify-content:flex-end}
+.bc-totals-box{background:var(--gray50);border-radius:10px;padding:16px;min-width:260px}
+.bc-totals-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px}
+.bc-totals-row.total{font-weight:700;font-size:14px;padding-top:12px;margin-top:8px;border-top:2px solid var(--gray300)}
+.chart-wrapper{position:relative;height:300px;margin-top:20px}
 </style>
 </head>
 <body>
@@ -212,7 +227,7 @@ textarea.form-control{resize:vertical;min-height:80px}
     <input type="password" id="login-pass" placeholder="••••••••">
     <div id="login-error" style="display:none" class="alert alert-error">Identifiants incorrects</div>
     <button class="btn-login" onclick="doLogin()">Connexion →</button>
-    <div class="demo-users" id="demo-users-block">
+    <div class="demo-users">
       <strong>Comptes de démonstration :</strong>
       <span class="demo-chip" onclick="fillDemo('achat','achat')">🛒 achat</span>
       <span class="demo-chip" onclick="fillDemo('stock','stock')">📦 stock</span>
@@ -253,16 +268,12 @@ textarea.form-control{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- ══════════════════ MODAL ══════════════════ -->
+<!-- ══════════════════ MODALS ══════════════════ -->
 <div id="modal-overlay">
   <div id="modal-box"></div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  SECURITY & DATA MANAGEMENT
-// ═══════════════════════════════════════════════
-
 const SEED = {
   users:[
     {id:1,name:'Admin',login:'admin',pass:'admin',role:'admin'},
@@ -312,9 +323,6 @@ const db={
 
 const sanitize=(s)=>s?(s+'').replace(/[<>\"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])):'';
 
-// ═══════════════════════════════════════════════
-//  GHOST PANEL (Super Admin)
-// ═══════════════════════════════════════════════
 let _logoClicks=0;let _logoTimer=null;
 function handleLogoClick(){
   _logoClicks++;
@@ -345,11 +353,6 @@ function doGhostLogin(){
   }
 }
 
-function canGhost(action){return currentUser&&currentUser.role==='ghost';}
-
-// ═══════════════════════════════════════════════
-//  AUTH (Optimized)
-// ═══════════════════════════════════════════════
 let currentUser=null;
 
 function doLogin(){
@@ -380,7 +383,7 @@ function fillDemo(u,p){
 function can(action){
   if(!currentUser)return false;
   const perms={
-    ghost:['all','ghost'],
+    ghost:['all'],
     admin:['all'],
     achat:['bc_read','bc_write','supplier_read','supplier_write','article_read','article_write','delivery_read','payment_read','import'],
     stock:['bc_read','supplier_read','article_read','delivery_read','delivery_write','import'],
@@ -389,9 +392,6 @@ function can(action){
   return (perms[currentUser.role]||[]).includes('all')||(perms[currentUser.role]||[]).includes(action);
 }
 
-// ═══════════════════════════════════════════════
-//  ROUTER & NAVIGATION
-// ═══════════════════════════════════════════════
 let currentPage='dashboard';
 
 const NAV=[
@@ -411,7 +411,7 @@ const NAV=[
 const ICONS={
   home:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
   dashboard:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
-  orders:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
+  orders:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>',
   deliveries:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h11l4 4v11a2 2 0 01-2 2h-3"/></svg>',
   payments:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
   suppliers:'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
@@ -461,9 +461,6 @@ function launchApp(){
   navigate('dashboard');
 }
 
-// ═══════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════
 const fmt={
   money:(v)=>Number(v||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' F CFA',
   date:(d)=>{if(!d)return '–';const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];},
@@ -475,12 +472,16 @@ function bcTVA(o){if(o.tva_enabled===false)return 0;return (o.lines||[]).reduce(
 function bcTTC(o){return bcTotal(o)+bcTVA(o);}
 function statusBadge(s){const map={draft:'Brouillon',sent:'Envoyé',partial:'Partiel',delivered:'Livré',closed:'Clôturé',cancelled:'Annulé',pending:'En attente',paid:'Payé',late:'En retard',complete:'Complet'};return `<span class="badge badge-${s}">${sanitize(map[s]||s)}</span>`;}
 function showAlert(msg,type='success'){const el=document.createElement('div');el.className=`alert alert-${type}`;el.innerHTML=`<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>${sanitize(msg)}`;const content=document.getElementById('content');content.insertBefore(el,content.firstChild);setTimeout(()=>el.remove(),3000);}
+function showModal(html,cls='modal-md'){document.getElementById('modal-box').innerHTML=`<div class="${cls}">${html}</div>`;document.getElementById('modal-overlay').classList.add('show');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+document.getElementById('modal-overlay')?.addEventListener('click',(e)=>{if(e.target.id==='modal-overlay')closeModal();});
 
-// ═══════════════════════════════════════════════
-//  PAGES
-// ═══════════════════════════════════════════════
 let _charts={};
 function _destroyCharts(){Object.values(_charts).forEach(c=>{try{c.destroy();}catch(e){}});_charts={};}
+
+// ═══════════════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════════════
 
 function renderHome(){
   _destroyCharts();
@@ -567,8 +568,158 @@ function renderDashboard(){
   </div>`;
 }
 
+function renderOrders(){
+  if(!can('bc_read')){document.getElementById('content').innerHTML='<p>Accès refusé</p>';return;}
+  const orders=db.all('orders');
+  document.getElementById('content').innerHTML=`
+  <div class="list-header">
+    <h2 style="margin:0">Gestion des bons de commande</h2>
+    ${can('bc_write')?`<button class="btn btn-primary" onclick="openOrderModal()">+ Nouveau BC</button>`:''}
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>N° BC</th><th>Date</th><th>Fournisseur</th><th>TTC</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${orders.length?orders.map(o=>{const sup=db.find('suppliers',o.supplier_id);return `<tr><td onclick="openOrderDetail(${o.id})" style="cursor:pointer;color:var(--orange);font-weight:700">${sanitize(o.numero)}</td><td>${fmt.date(o.date)}</td><td>${sup?sanitize(sup.name):'–'}</td><td style="text-align:right"><strong>${fmt.money(bcTTC(o))}</strong></td><td>${statusBadge(o.status)}</td><td><div class="td-actions">${can('bc_write')?`<button class="btn-icon" onclick="openOrderModal(${o.id})" title="Éditer"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button class="btn-icon" onclick="delOrder(${o.id})" title="Supprimer"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>`:''}
+</div></td></tr>`;}).join(''):`<tr><td colspan="6"><div class="empty-state"><p>Aucun bon de commande</p></div></td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function openOrderModal(id){
+  const order=id?db.find('orders',id):{numero:'',date:fmt.today(),supplier_id:1,status:'draft',lines:[],notes:'',conditions:'30j',lieu:''};
+  const suppliers=db.all('suppliers');
+  const articles=db.all('articles');
+  
+  let linesHtml='';
+  (order.lines||[]).forEach((l,i)=>{
+    const art=articles.find(a=>a.id===l.article_id);
+    linesHtml+=`<tr><td><input type="number" value="${l.article_id}" onchange="this.dataset.aid=this.value" style="width:50px"/></td><td><input type="text" value="${sanitize(l.designation)}" style="width:150px"/></td><td><input type="number" value="${l.qty}" style="width:50px"/></td><td><input type="number" step="0.01" value="${l.prix}" style="width:60px"/></td><td><input type="number" value="${l.tva||18}" style="width:40px"/></td><td style="text-align:right"><strong>${fmt.money(l.qty*l.prix*(1+l.tva/100))}</strong></td><td><button class="btn-icon" onclick="this.parentElement.parentElement.remove()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button></td></tr>`;
+  });
+
+  const total=order.lines?order.lines.reduce((s,l)=>s+(l.qty*l.prix),0):0;
+  const tva=order.lines?order.lines.reduce((s,l)=>s+(l.qty*l.prix*l.tva/100),0):0;
+
+  showModal(`
+  <div class="modal-header">
+    <span class="modal-title">${id?'Éditer':'Créer'} un bon de commande</span>
+    <button onclick="closeModal()" style="font-size:20px;opacity:.6">×</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">N° BC</label><input type="text" id="bc_numero" class="form-control" value="${sanitize(order.numero)}" placeholder="ex: 001-2025"></div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" id="bc_date" class="form-control" value="${order.date}"></div>
+      <div class="form-group"><label class="form-label">Fournisseur</label><select id="bc_supplier" class="form-control">${suppliers.map(s=>`<option value="${s.id}" ${s.id===order.supplier_id?'selected':''}>${sanitize(s.name)}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Statut</label><select id="bc_status" class="form-control"><option value="draft" ${order.status==='draft'?'selected':''}>Brouillon</option><option value="sent" ${order.status==='sent'?'selected':''}>Envoyé</option><option value="partial" ${order.status==='partial'?'selected':''}>Partiel</option><option value="delivered" ${order.status==='delivered'?'selected':''}>Livré</option></select></div>
+      <div class="form-group full"><label class="form-label">Notes</label><textarea id="bc_notes" class="form-control">${sanitize(order.notes)}</textarea></div>
+      <div class="form-group"><label class="form-label">Conditions</label><input type="text" id="bc_conditions" class="form-control" value="${sanitize(order.conditions)}" placeholder="ex: 30j"></div>
+      <div class="form-group"><label class="form-label">Lieu de livraison</label><input type="text" id="bc_lieu" class="form-control" value="${sanitize(order.lieu)}"></div>
+    </div>
+
+    <div style="margin-top:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-size:14px;font-weight:700">Lignes de commande</h3>
+        <button class="btn btn-sm btn-secondary" onclick="addOrderLine()">+ Ajouter une ligne</button>
+      </div>
+      <div class="table-wrap">
+        <table class="bc-table">
+          <thead><tr><th>Article</th><th>Désignation</th><th>Qté</th><th>Prix U.</th><th>TVA %</th><th>TTC</th><th></th></tr></thead>
+          <tbody id="bc-lines">
+            ${linesHtml}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bc-totals">
+      <div class="bc-totals-box">
+        <div class="bc-totals-row"><span>Total HT:</span><span style="text-align:right">${fmt.money(total)}</span></div>
+        <div class="bc-totals-row"><span>TVA (18%):</span><span style="text-align:right">${fmt.money(tva)}</span></div>
+        <div class="bc-totals-row total"><span>Total TTC:</span><span style="text-align:right">${fmt.money(total+tva)}</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+    <button class="btn btn-primary" onclick="saveOrder(${id||0})">Enregistrer</button>
+  </div>`, 'modal-xl');
+}
+
+function addOrderLine(){
+  const tbody=document.getElementById('bc-lines');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input type="number" value="1" style="width:50px"/></td><td><input type="text" placeholder="Désignation" style="width:150px"/></td><td><input type="number" value="1" style="width:50px"/></td><td><input type="number" step="0.01" value="0" style="width:60px"/></td><td><input type="number" value="18" style="width:40px"/></td><td style="text-align:right"><strong>0 F CFA</strong></td><td><button class="btn-icon" onclick="this.parentElement.remove()"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button></td>`;
+  tbody.appendChild(tr);
+}
+
+function saveOrder(id){
+  const lines=[];
+  document.querySelectorAll('#bc-lines tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input');
+    lines.push({article_id:parseInt(inputs[0].value),designation:inputs[1].value,qty:parseInt(inputs[2].value),prix:parseFloat(inputs[3].value),tva:parseInt(inputs[4].value)});
+  });
+  const order={id:id||db.nextId('orders'),numero:document.getElementById('bc_numero').value,date:document.getElementById('bc_date').value,supplier_id:parseInt(document.getElementById('bc_supplier').value),status:document.getElementById('bc_status').value,lines,notes:document.getElementById('bc_notes').value,conditions:document.getElementById('bc_conditions').value,lieu:document.getElementById('bc_lieu').value};
+  db.save('orders',order);
+  closeModal();
+  showAlert('Bon de commande enregistré!');
+  renderOrders();
+}
+
+function delOrder(id){if(confirm('Supprimer ce bon ?')){db.delete('orders',id);renderOrders();showAlert('Bon supprimé!');}}
+
+function openOrderDetail(id){
+  const order=db.find('orders',id);
+  const sup=db.find('suppliers',order.supplier_id);
+  const total=bcTotal(order);
+  const tva=bcTVA(order);
+  showModal(`
+  <div class="modal-header">
+    <span class="modal-title">BC ${sanitize(order.numero)}</span>
+    <button onclick="closeModal()" style="font-size:20px;opacity:.6">×</button>
+  </div>
+  <div class="modal-body">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px">
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Fournisseur</div><div style="font-weight:600">${sup?sanitize(sup.name):'–'}</div></div>
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Date</div><div style="font-weight:600">${fmt.date(order.date)}</div></div>
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Statut</div>${statusBadge(order.status)}</div>
+      <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Conditions</div><div style="font-weight:600">${sanitize(order.conditions)}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Désignation</th><th style="text-align:right">Qté</th><th style="text-align:right">Prix U.</th><th style="text-align:right">TTC</th></tr></thead>
+        <tbody>
+          ${order.lines.map(l=>`<tr><td>${sanitize(l.designation)}</td><td style="text-align:right">${l.qty}</td><td style="text-align:right">${fmt.money(l.prix)}</td><td style="text-align:right"><strong>${fmt.money(l.qty*l.prix*(1+l.tva/100))}</strong></td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="bc-totals" style="margin-top:20px">
+      <div class="bc-totals-box">
+        <div class="bc-totals-row"><span>Total HT:</span><span style="text-align:right">${fmt.money(total)}</span></div>
+        <div class="bc-totals-row"><span>TVA:</span><span style="text-align:right">${fmt.money(tva)}</span></div>
+        <div class="bc-totals-row total"><span>Total TTC:</span><span style="text-align:right">${fmt.money(bcTTC(order))}</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal()">Fermer</button>
+    ${can('bc_write')?`<button class="btn btn-primary" onclick="openOrderModal(${id})">Éditer</button>`:''}
+  </div>`, 'modal-lg');
+}
+
+function renderDeliveries(){document.getElementById('content').innerHTML='<p>Livraisons (en construction)</p>';}
+function renderPayments(){document.getElementById('content').innerHTML='<p>Paiements (en construction)</p>';}
+function renderSuppliers(){document.getElementById('content').innerHTML='<p>Fournisseurs (en construction)</p>';}
+function renderArticles(){document.getElementById('content').innerHTML='<p>Articles (en construction)</p>';}
+function renderImport(){document.getElementById('content').innerHTML='<p>Import Excel (en construction)</p>';}
+function renderAnalyses(){document.getElementById('content').innerHTML='<p>Analyses (en construction)</p>';}
+function renderUsers(){document.getElementById('content').innerHTML='<p>Utilisateurs (en construction)</p>';}
+
 function renderGhostPanel(){
-  if(!canGhost('ghost')){document.getElementById('content').innerHTML='<p>Accès non autorisé</p>';return;}
+  if(currentUser.role!=='ghost'){document.getElementById('content').innerHTML='<p>Accès refusé</p>';return;}
   document.getElementById('content').innerHTML=`
   <div style="max-width:800px">
     <div style="padding:20px;background:rgba(139,92,246,.1);border-radius:12px;border:1px solid #8b5cf6;margin-bottom:20px">
@@ -623,15 +774,6 @@ function showStats(){
   const stats={users:db.all('users').length,suppliers:db.all('suppliers').length,articles:db.all('articles').length,orders:db.all('orders').length,deliveries:db.all('deliveries').length,payments:db.all('payments').length};
   alert('📊 Statistiques:\n\n'+Object.entries(stats).map(([k,v])=>`${k}: ${v}`).join('\n'));
 }
-
-function renderOrders(){document.getElementById('content').innerHTML='<p>Bons de commande (en construction)</p>';}
-function renderDeliveries(){document.getElementById('content').innerHTML='<p>Livraisons (en construction)</p>';}
-function renderPayments(){document.getElementById('content').innerHTML='<p>Paiements (en construction)</p>';}
-function renderSuppliers(){document.getElementById('content').innerHTML='<p>Fournisseurs (en construction)</p>';}
-function renderArticles(){document.getElementById('content').innerHTML='<p>Articles (en construction)</p>';}
-function renderImport(){document.getElementById('content').innerHTML='<p>Import Excel (en construction)</p>';}
-function renderAnalyses(){document.getElementById('content').innerHTML='<p>Analyses (en construction)</p>';}
-function renderUsers(){document.getElementById('content').innerHTML='<p>Utilisateurs (en construction)</p>';}
 
 window.addEventListener('DOMContentLoaded',()=>{db.init();});
 </script>
