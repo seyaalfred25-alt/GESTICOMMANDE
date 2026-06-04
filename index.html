@@ -187,6 +187,13 @@ textarea.form-control{resize:vertical;min-height:80px}
 .tag{display:inline-block;padding:2px 8px;background:var(--gray100);border-radius:4px;font-size:11px;color:var(--text2)}
 .progress-bar-wrap{height:6px;background:var(--gray200);border-radius:3px;overflow:hidden}
 .progress-bar{height:100%;border-radius:3px;background:var(--green);transition:width .3s}
+.MODULE_TILES{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.module-tile{position:relative;background:#fff;border-radius:16px;padding:22px 16px 18px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid transparent;transition:all .15s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.module-tile:hover{border-color:var(--orange);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.module-badge{position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+.module-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.module-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.module-desc{font-size:11px;color:var(--text3);line-height:1.4}
 </style>
 </head>
 <body>
@@ -258,10 +265,10 @@ textarea.form-control{resize:vertical;min-height:80px}
 
 const SEED = {
   users:[
-    {id:1,name:'Admin',login:'admin',role:'admin'},
-    {id:2,name:'Jean Martin',login:'achat',role:'achat'},
-    {id:3,name:'Sophie Dubois',login:'stock',role:'stock'},
-    {id:4,name:'Marc Leroy',login:'finance',role:'finance'}
+    {id:1,name:'Admin',login:'admin',pass:'admin',role:'admin'},
+    {id:2,name:'Jean Martin',login:'achat',pass:'achat',role:'achat'},
+    {id:3,name:'Sophie Dubois',login:'stock',pass:'stock',role:'stock'},
+    {id:4,name:'Marc Leroy',login:'finance',pass:'finance',role:'finance'}
   ],
   suppliers:[
     {id:1,fournisseur_id:'F-R001',name:'Papeterie Dupont',phone:'01 23 45 67 89',address:'12 Rue de la Paix, Abidjan',compte_contribuable:'CC-12345',regime_imposition:'Réel',email:'contact@papet.ci',site_web:''},
@@ -306,7 +313,7 @@ const db={
 const sanitize=(s)=>s?(s+'').replace(/[<>\"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])):'';
 
 // ═══════════════════════════════════════════════
-//  GHOST PANEL (Super Admin with sanitization)
+//  GHOST PANEL (Super Admin)
 // ═══════════════════════════════════════════════
 let _logoClicks=0;let _logoTimer=null;
 function handleLogoClick(){
@@ -477,7 +484,57 @@ function _destroyCharts(){Object.values(_charts).forEach(c=>{try{c.destroy();}ca
 
 function renderHome(){
   _destroyCharts();
-  document.getElementById('content').innerHTML=`<div style="max-width:800px;margin:0 auto"><div style="margin-bottom:32px;text-align:center;padding-top:8px"><div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px">Bonjour, ${sanitize(currentUser.name)} 👋</div><div style="font-size:13px;color:var(--text3)">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div></div>`;
+  const orders=db.all('orders');
+  const payments=db.all('payments');
+  const pendingOrders=orders.filter(o=>['sent','partial'].includes(o.status));
+  const latePayments=payments.filter(p=>p.status==='late');
+  const pendingDeliveries=orders.filter(o=>['sent','partial'].includes(o.status));
+
+  const allowedModules=NAV.filter(n=>n.roles.includes(currentUser.role)&&n.id!=='home'&&n.id!=='ghost_panel');
+  const ghostExtra=currentUser.role==='ghost'?[{id:'ghost_panel',label:'Panneau Fantôme',roles:['ghost']}]:[];
+  const allModules=[...allowedModules,...ghostExtra];
+
+  const MODULE_META={
+    dashboard:{label:'Tableau de bord',desc:'Statistiques et graphiques',color:'#0f172a',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'},
+    orders:{label:'Bons de commande',desc:'Créer et suivre vos commandes',color:'#f97316',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>'},
+    deliveries:{label:'Livraisons',desc:'Réceptionner et suivre les livraisons',color:'#10b981',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h11l4 4v11a2 2 0 01-2 2h-3"/></svg>'},
+    payments:{label:'Paiements',desc:'Gérer les échéances et règlements',color:'#3b82f6',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>'},
+    suppliers:{label:'Fournisseurs',desc:'Base de données fournisseurs',color:'#8b5cf6',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'},
+    articles:{label:'Articles',desc:'Catalogue des articles',color:'#f59e0b',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>'},
+    import:{label:'Import Excel',desc:'Importer et exporter des données',color:'#64748b',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>'},
+    analyses:{label:'Analyses',desc:'Rapports et statistiques',color:'#06b6d4',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg>'},
+    users:{label:'Utilisateurs',desc:'Gérer les comptes et rôles',color:'#ec4899',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'},
+    ghost_panel:{label:'Panneau Fantôme',desc:'Outils d\'administration',color:'#8b5cf6',icon:'<svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v11m0 0l-2 2m2-2l2 2m7-11v11m0 0l2 2m-2-2l-2 2"/></svg>'}
+  };
+
+  const badges={orders:pendingOrders.length,payments:latePayments.length,deliveries:pendingDeliveries.length};
+
+  document.getElementById('content').innerHTML=`
+  <div style="max-width:900px;margin:0 auto">
+    <div style="margin-bottom:32px;text-align:center;padding-top:8px">
+      <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px">Bonjour, ${sanitize(currentUser.name)} 👋</div>
+      <div style="font-size:13px;color:var(--text3)">${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+    </div>
+
+    ${latePayments.length||pendingOrders.length?`
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px">
+      ${latePayments.length?`<div onclick="navigate('payments')" style="flex:1;min-width:200px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s" onmouseenter="this.style.background='#fee2e2'" onmouseleave="this.style.background='#fef2f2'"><span style="font-size:24px">⚠️</span><div><div style="font-weight:700;font-size:13px;color:#991b1b">${latePayments.length} paiement${latePayments.length>1?'s':''} en retard</div><div style="font-size:12px;color:#dc2626;margin-top:2px">Cliquer pour gérer →</div></div></div>`:''}
+      ${pendingOrders.length?`<div onclick="navigate('orders')" style="flex:1;min-width:200px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s" onmouseenter="this.style.background='#ffedd5'" onmouseleave="this.style.background='#fff7ed'"><span style="font-size:24px">📦</span><div><div style="font-weight:700;font-size:13px;color:#c2410c">${pendingOrders.length} commande${pendingOrders.length>1?'s':''} en attente</div><div style="font-size:12px;color:#ea580c;margin-top:2px">Cliquer pour voir →</div></div></div>`:''}
+    </div>`:''}
+
+    <div class="MODULE_TILES">
+      ${allModules.map(n=>{
+        const m=MODULE_META[n.id]||{label:n.label,desc:'',color:'#64748b',icon:''};
+        const badgeCount=badges[n.id]||0;
+        return `
+        <div class="module-tile" onclick="navigate('${sanitize(n.id)}')" style="border-color:${badgeCount?'#ef4444':'transparent'}">
+          ${badgeCount?`<div class="module-badge">${badgeCount}</div>`:''}
+          <div class="module-icon" style="background:${m.color}15;color:${m.color}">${m.icon}</div>
+          <div><div class="module-label">${sanitize(m.label)}</div><div class="module-desc">${sanitize(m.desc)}</div></div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
 }
 
 function renderDashboard(){
@@ -563,14 +620,7 @@ function exportData(){
 }
 
 function showStats(){
-  const stats={
-    users:db.all('users').length,
-    suppliers:db.all('suppliers').length,
-    articles:db.all('articles').length,
-    orders:db.all('orders').length,
-    deliveries:db.all('deliveries').length,
-    payments:db.all('payments').length
-  };
+  const stats={users:db.all('users').length,suppliers:db.all('suppliers').length,articles:db.all('articles').length,orders:db.all('orders').length,deliveries:db.all('deliveries').length,payments:db.all('payments').length};
   alert('📊 Statistiques:\n\n'+Object.entries(stats).map(([k,v])=>`${k}: ${v}`).join('\n'));
 }
 
