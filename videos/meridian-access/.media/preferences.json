@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "website",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:25:59.875Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:25:59.946Z"
+    },
+    "language": {
+      "value": "fr",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:26:00.014Z"
+    },
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:26:00.086Z"
+    },
+    "storyboard": {
+      "value": "yes",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:26:00.143Z"
+    },
+    "voice": {
+      "value": "female",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:26:00.197Z"
+    },
+    "style_preset.product-launch-video": {
+      "value": "blue-professional",
+      "confirmed_in": [
+        "meridian-access"
+      ],
+      "updated_at": "2026-09-30T13:26:16.134Z"
+    }
+  },
+  "sightings": {}
+}
