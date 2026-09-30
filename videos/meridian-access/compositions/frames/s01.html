@@ -1,0 +1,241 @@
+<template>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Manrope"; font-style: normal; font-weight: 700; font-display: block; src: url("assets/fonts/manrope-700-normal-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: "Manrope"; font-style: normal; font-weight: 800; font-display: block; src: url("assets/fonts/manrope-800-normal-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 500; font-display: block; src: url("assets/fonts/inter-500-normal-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: block; src: url("assets/fonts/inter-600-normal-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+    #root { position: absolute; inset: 0; overflow: hidden; font-family: "Inter", sans-serif; color: #FFFFFF; }
+
+    /* Décor commun : fond bleu nuit + grille qui dérive en diagonale + lignes de flux */
+    #s01-bg { position: absolute; inset: 0; background: #0A2140; overflow: hidden; }
+    #s01-grid { position: absolute; inset: -160px;
+      background-image:
+        linear-gradient(rgba(169,220,238,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(169,220,238,0.07) 1px, transparent 1px);
+      background-size: 80px 80px; }
+    #s01-vignette { position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 65% at 50% 45%, rgba(10,33,64,0) 0%, rgba(6,20,40,0.75) 100%); }
+    #s01-flux { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+    #s01-flux path { fill: none; stroke: #5FB8D8; stroke-width: 1.5; stroke-linecap: round; }
+
+    /* Caméra */
+    #s01-cam { position: absolute; inset: 0; transform-origin: 50% 42%; }
+    #s01-pile { position: absolute; left: 500px; top: 110px; width: 920px; height: 760px; transform-origin: 50% 100%; }
+
+    .s01-card { position: absolute; left: 0; top: 0; will-change: transform, opacity; opacity: 0; }
+    .s01-doc { background: #F4F7FB; color: #0A2140; border-radius: 14px; border: 1px solid rgba(10,33,64,0.10);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.28); }
+    .s01-row { display: flex; align-items: center; gap: 18px; }
+    .s01-ico { width: 56px; height: 56px; flex: none; border-radius: 12px; background: #E3ECF5; display: grid; place-items: center; }
+    .s01-ico svg { width: 30px; height: 30px; stroke: #2A5B86; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .s01-meta { font: 500 20px/1.2 "Inter", sans-serif; color: #5A6B80; }
+    .s01-title { font: 600 30px/1.2 "Inter", sans-serif; color: #0A2140; }
+    .s01-tag { font: 600 14px/1 "Inter", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: #B42318; background: #FDECEA; border-radius: 100px; padding: 7px 12px; }
+
+    #s01-c-mail { width: 640px; padding: 26px 30px; }
+    #s01-c-xls  { width: 560px; padding: 26px 30px; }
+    #s01-c-paper { width: 420px; height: 540px; padding: 34px 36px; background: #FBF8F0; border-radius: 4px; }
+    #s01-c-chat { width: 600px; padding: 24px 30px; border-radius: 26px 26px 26px 6px; }
+    .s01-chip { padding: 18px 26px; border-radius: 12px; }
+
+    .s01-paper-h { font: 800 22px/1 "Manrope", sans-serif; letter-spacing: 0.08em; color: #34465C; margin-bottom: 8px; }
+    .s01-paper-sub { font: 500 15px/1 "Inter", sans-serif; color: #7C8A9B; margin-bottom: 26px; }
+    .s01-line { height: 12px; border-radius: 6px; background: #D9DEE5; margin: 0 0 18px; }
+    .s01-stamp { position: absolute; right: 26px; bottom: 34px; width: 130px; height: 130px; border: 4px solid rgba(58,90,140,0.35); border-radius: 50%; }
+    .s01-fold { position: absolute; left: 0; right: 0; top: 46%; height: 2px; background: rgba(0,0,0,0.06); }
+
+    .s01-grid-ico { display: grid; grid-template-columns: repeat(3, 8px); grid-template-rows: repeat(3, 8px); gap: 3px; }
+    .s01-grid-ico i { display: block; background: #2A5B86; opacity: 0.8; border-radius: 1px; }
+
+    /* Question */
+    #s01-q { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-family: "Manrope", sans-serif; font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.02; }
+    .s01-qline { display: block; font-size: 150px; }
+    .s01-w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 0.04em 0.12em; margin-bottom: -0.12em; }
+    .s01-w > span { display: inline-block; will-change: transform; }
+    #s01-w-cmd { color: #5FB8D8; }
+    #s01-underline { position: absolute; left: 50%; top: 612px; width: 760px; margin-left: -380px; height: 8px; border-radius: 4px; background: #5FB8D8; transform-origin: 0 50%; }
+  </style>
+
+  <div id="root" data-composition-id="s01" data-width="1920" data-height="1080">
+    <div id="s01-bg" class="clip" data-start="0" data-duration="9.5" data-track-index="0">
+      <div id="s01-grid"></div>
+      <svg id="s01-flux" viewBox="0 0 1920 1080">
+        <path id="s01-f1" d="M 120 880 C 360 820, 420 700, 610 720" />
+        <path id="s01-f2" d="M 1320 240 C 1480 300, 1560 190, 1800 230" />
+        <path id="s01-f3" d="M 1420 860 C 1560 800, 1650 900, 1830 840" />
+        <path id="s01-f4" d="M 90 210 C 260 260, 330 150, 470 190" />
+      </svg>
+      <div id="s01-vignette"></div>
+    </div>
+
+    <div id="s01-stage" class="clip" data-start="0" data-duration="9.5" data-track-index="1">
+      <div id="s01-cam">
+        <div id="s01-pile" data-layout-ignore>
+          <!-- bon papier scanné -->
+          <div id="s01-c-paper" class="s01-card s01-doc">
+            <div class="s01-paper-h">BON DE COMMANDE</div>
+            <div class="s01-paper-sub">Scan_0417.pdf · page 1/2</div>
+            <div class="s01-line" style="width:92%"></div>
+            <div class="s01-line" style="width:74%"></div>
+            <div class="s01-line" style="width:86%"></div>
+            <div class="s01-line" style="width:58%"></div>
+            <div class="s01-line" style="width:80%"></div>
+            <div class="s01-line" style="width:66%"></div>
+            <div class="s01-fold"></div>
+            <div class="s01-stamp"></div>
+          </div>
+          <!-- fichier tableur -->
+          <div id="s01-c-xls" class="s01-card s01-doc">
+            <div class="s01-row">
+              <div class="s01-ico"><div class="s01-grid-ico"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div>
+                <div class="s01-title">devis_v3_final.xlsx</div>
+                <div class="s01-meta">Modifié · 3 versions</div>
+              </div>
+            </div>
+          </div>
+          <!-- e-mail -->
+          <div id="s01-c-mail" class="s01-card s01-doc">
+            <div class="s01-row">
+              <div class="s01-ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+              <div style="flex:1">
+                <div class="s01-row" style="gap:12px"><span class="s01-tag">Urgent</span><span class="s01-meta">Boîte de réception</span></div>
+                <div class="s01-title" style="margin-top:8px">DA urgente — à valider</div>
+              </div>
+            </div>
+          </div>
+          <!-- message -->
+          <div id="s01-c-chat" class="s01-card s01-doc">
+            <div class="s01-meta" style="margin-bottom:6px">Message</div>
+            <div class="s01-title">Tu as relancé le fournisseur ?</div>
+          </div>
+          <!-- saturation -->
+          <div id="s01-x1" class="s01-card s01-doc s01-chip"><div class="s01-title" style="font-size:21px">RE: RE: devis</div></div>
+          <div id="s01-x2" class="s01-card s01-doc s01-chip"><div class="s01-title" style="font-size:21px">Relance n°3</div></div>
+          <div id="s01-x3" class="s01-card s01-doc s01-chip"><div class="s01-title" style="font-size:21px">Pièce jointe manquante</div></div>
+          <div id="s01-x4" class="s01-card s01-doc s01-chip"><div class="s01-title" style="font-size:21px">BC_scan_002.pdf</div></div>
+          <div id="s01-x5" class="s01-card s01-doc s01-chip"><div class="s01-title" style="font-size:21px">Livré ou pas ?</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="s01-qwrap" class="clip" data-start="0" data-duration="9.5" data-track-index="2">
+      <div id="s01-q" data-layout-allow-occlusion>
+        <span class="s01-qline">
+          <span class="s01-w"><span id="s01-w1">Où</span></span>
+          <span class="s01-w"><span id="s01-w2">en</span></span>
+          <span class="s01-w"><span id="s01-w3">est</span></span>
+          <span class="s01-w"><span id="s01-w4">ma</span></span>
+        </span>
+        <span class="s01-qline">
+          <span class="s01-w"><span id="s01-w-cmd">commande</span></span>
+          <span class="s01-w"><span id="s01-w5">?</span></span>
+        </span>
+      </div>
+      <div id="s01-underline"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const DUR = 9.5;
+      // Repères calés sur la voix off (estimations — recalées sur les timings HeyGen).
+      const CUE = { mail: 0.9, xls: 2.5, paper: 3.9, chat: 5.5, sat: 6.0, freeze: 7.25,
+                    w1: 7.3, w2: 7.5, w3: 7.65, w4: 7.85, cmd: 8.1, qm: 8.45, under: 8.35 };
+
+      // ── utilitaires déterministes ──
+      const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+      const lin = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+      const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+      const easeInOut = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+      // Ressort amorti en forme fermée (léger dépassement, ζ < 1)
+      function spring(dt, w = 13, z = 0.72) {
+        if (dt <= 0) return 0;
+        const wd = w * Math.sqrt(1 - z * z);
+        return 1 - Math.exp(-z * w * dt) * (Math.cos(wd * dt) + (z * w / wd) * Math.sin(wd * dt));
+      }
+      const $ = (id) => document.getElementById(id);
+
+      // Cartes : position finale dans la pile (repère du conteneur 800×700), rotation, instant d'arrivée
+      const cards = [
+        { el: $("s01-c-paper"), x: -40, y: 170, r: -7,  t0: CUE.paper, from: -520 },
+        { el: $("s01-c-xls"),   x: 360, y: 250, r: 5,   t0: CUE.xls,   from: -420 },
+        { el: $("s01-c-mail"),  x: 170, y: 40,  r: -3,  t0: CUE.mail,  from: -380 },
+        { el: $("s01-c-chat"),  x: 300, y: 520, r: 4,   t0: CUE.chat,  from: -460 },
+        { el: $("s01-x1"),      x: 640, y: -10,  r: 9,   t0: CUE.sat + 0.00, from: -360 },
+        { el: $("s01-x2"),      x: -120, y: 420, r: -11, t0: CUE.sat + 0.22, from: -420 },
+        { el: $("s01-x3"),      x: 600, y: 400, r: 7,   t0: CUE.sat + 0.42, from: -380 },
+        { el: $("s01-x4"),      x: 10,  y: 680, r: -5,  t0: CUE.sat + 0.60, from: -420 },
+        { el: $("s01-x5"),      x: 700, y: 650, r: -9,  t0: CUE.sat + 0.76, from: -380 }
+      ];
+      // ordre d'empilement = ordre d'arrivée
+      cards.slice().sort((a, b) => a.t0 - b.t0).forEach((c, i) => { c.el.style.zIndex = 10 + i; });
+
+      const words = ["s01-w1", "s01-w2", "s01-w3", "s01-w4", "s01-w-cmd", "s01-w5"].map($);
+      const wordT = [CUE.w1, CUE.w2, CUE.w3, CUE.w4, CUE.cmd, CUE.qm];
+      const grid = $("s01-grid"), cam = $("s01-cam"), pile = $("s01-pile"), stage = $("s01-stage");
+      const under = $("s01-underline");
+      const flux = ["s01-f1", "s01-f2", "s01-f3", "s01-f4"].map($);
+      flux.forEach((p) => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.dataset.len = L; });
+
+      function render(t) {
+        const tf = Math.min(t, CUE.freeze);          // tout se fige à « où en est ma commande ? »
+        const frozen = lin(t, CUE.freeze, CUE.freeze + 0.35);
+
+        // grille qui dérive en diagonale (continue, même figée : c'est le décor)
+        const g = t * 14;
+        grid.style.transform = `translate(${(g % 80).toFixed(2)}px, ${(g % 80).toFixed(2)}px)`;
+        // lignes de flux éparses, déconnectées
+        flux.forEach((p, i) => {
+          const L = +p.dataset.len;
+          const k = easeOut(lin(t, 0.2 + i * 0.5, 2.2 + i * 0.5));
+          p.style.strokeDashoffset = (L * (1 - k)).toFixed(1);
+          p.style.opacity = (0.28 * (1 - 0.6 * frozen)).toFixed(3);
+        });
+
+        // caméra : lente poussée + dérive
+        const c = easeInOut(lin(tf, 0, CUE.freeze));
+        cam.style.transform = `translate(${(-18 * c).toFixed(2)}px, ${(10 * c).toFixed(2)}px) scale(${(1 + 0.07 * c).toFixed(4)})`;
+
+        // la pile penche puis sature (tremblement déterministe croissant)
+        const lean = easeInOut(lin(tf, CUE.paper, CUE.freeze));
+        const shakeAmp = 2.2 * lin(tf, CUE.sat, CUE.freeze);
+        const shake = shakeAmp * Math.sin(tf * 38) * Math.sin(tf * 5.3);
+        pile.style.transform = `rotate(${(-6 * lean + shake * 0.25).toFixed(3)}deg) translate(${(shake).toFixed(2)}px, ${(16 * lean).toFixed(2)}px)`;
+
+        cards.forEach((cd) => {
+          const dt = tf - cd.t0;
+          if (dt <= 0) { cd.el.style.opacity = 0; return; }
+          const s = spring(dt, 14, 0.7);
+          const y = cd.y + cd.from * (1 - s);
+          const r = cd.r * (0.35 + 0.65 * s);
+          cd.el.style.opacity = lin(dt, 0, 0.12).toFixed(3);
+          cd.el.style.transform = `translate(${cd.x}px, ${y.toFixed(2)}px) rotate(${r.toFixed(3)}deg) scale(${(1.05 - 0.05 * s).toFixed(4)})`;
+        });
+
+        // gel : la pile s'éteint et recule derrière la question
+        stage.style.opacity = (1 - 0.72 * frozen).toFixed(3);
+        stage.style.filter = frozen > 0 ? `blur(${(6 * frozen).toFixed(2)}px) saturate(${(1 - 0.8 * frozen).toFixed(3)})` : "none";
+
+        // question révélée par masque, mot à mot
+        words.forEach((w, i) => {
+          const s = spring(t - wordT[i], 15, 0.78);
+          w.style.transform = `translateY(${(112 * (1 - s)).toFixed(2)}%)`;
+          w.style.opacity = t >= wordT[i] ? 1 : 0;   // invisible tant que le masque ne l'a pas révélé
+        });
+        const u = easeOut(lin(t, CUE.under, CUE.under + 0.45));
+        under.style.transform = `scaleX(${u.toFixed(4)})`;
+        under.style.opacity = u > 0 ? 1 : 0;
+      }
+
+      const state = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.to(state, { t: DUR, duration: DUR, ease: "none", onUpdate: () => render(state.t) }, 0);
+      render(0);
+      window.__timelines["s01"] = tl;
+    })();
+  </script>
+</template>

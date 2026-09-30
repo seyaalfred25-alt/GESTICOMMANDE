@@ -25,8 +25,8 @@ Composants 21st.dev reproduits à la main (mécanique seulement).
 - duration: 9.5s
 - poster: 8.5s
 - transition_in: cut
-- status: outline
-- src: compositions/frames/01-desordre.html
+- status: animated
+- src: compositions/frames/s01.html
 - type: hook
 - persuasion: Pain validation (miroir du quotidien de l'acheteur)
 - beat: overwhelm → tension
@@ -45,7 +45,7 @@ keyMessage: le suivi des achats est éparpillé ; personne ne sait où en est la
 - poster: 3.8s
 - transition_in: cut
 - status: outline
-- src: compositions/frames/02-meridian-access.html
+- src: compositions/frames/s02.html
 - type: product_intro
 - persuasion: Negative contrast (désordre → un seul outil)
 - beat: relief + clarity
@@ -64,7 +64,7 @@ keyMessage: un seul outil pour tout le cycle achat. Vignette PNG de la vidéo ti
 - poster: 4s
 - transition_in: push-slide LEFT
 - status: outline
-- src: compositions/frames/03-cycle.html
+- src: compositions/frames/s03.html
 - type: key_feature
 - persuasion: Show-don't-tell proof (le parcours complet, écran par écran)
 - beat: clarity + control
@@ -83,7 +83,7 @@ keyMessage: chaque étape du cycle est tracée dans le même outil.
 - poster: 5.5s
 - transition_in: crossfade
 - status: outline
-- src: compositions/frames/04-meilleure-offre.html
+- src: compositions/frames/s04.html
 - type: key_feature
 - persuasion: Feature-to-benefit translation (le comparatif désigne la meilleure offre ; on commande ligne par ligne)
 - beat: confidence + control
@@ -102,7 +102,7 @@ keyMessage: la meilleure offre ressort d'elle-même ; on ne commande que ce qui 
 - poster: 4s
 - transition_in: crossfade
 - status: outline
-- src: compositions/frames/05-controle.html
+- src: compositions/frames/s05.html
 - type: benefits
 - persuasion: Rule of three (livraisons, factures, échéances) → peace of mind
 - beat: control + peace of mind
@@ -121,7 +121,7 @@ keyMessage: vous savez qui payer, et quand.
 - poster: 5s
 - transition_in: zoom-through
 - status: outline
-- src: compositions/frames/06-hors-ligne.html
+- src: compositions/frames/s06.html
 - type: benefits
 - persuasion: Risk reversal (pas de dépendance au réseau, données sur le poste)
 - beat: trust + peace of mind
@@ -134,13 +134,13 @@ keyMessage: sans internet, vos données chez vous, chaque société isolée.
 
 ## Frame 7 — Au-delà des achats
 
-- scene: Bento de 4 cellules qui arrivent en vol — Stock (physique vs théorique), Ventes & comptoir (ticket 80 mm), Comptabilité (journaux), [4e cellule À VALIDER] ; la caméra plonge dans chaque cellule quand la voix la cite, recule sur « Toute votre gestion, au même endroit. »
+- scene: Bento de 4 cellules qui arrivent en vol — Stock (physique vs théorique), Ventes & comptoir (ticket 80 mm), Comptabilité (journaux), Flotte & immobilisations (validé : remplace « Tableau de bord DG » pour coller à la voix) ; la caméra plonge dans chaque cellule quand la voix la cite, recule sur « Toute votre gestion, au même endroit. »
 - voiceover: "Et quand vous êtes prêts : stock, ventes, comptabilité, flotte. Toute votre gestion, au même endroit."
 - duration: 6.5s
 - poster: 6s
 - transition_in: crossfade
 - status: outline
-- src: compositions/frames/07-au-dela.html
+- src: compositions/frames/s07.html
 - type: benefits
 - persuasion: Future pacing (la version Gestion Commerciale quand l'entreprise est prête)
 - beat: aspiration
@@ -162,7 +162,7 @@ interface stylisée, libellés seuls, sans aucun chiffre.
 - poster: 6.8s
 - transition_in: blur-crossfade
 - status: outline
-- src: compositions/frames/08-cta.html
+- src: compositions/frames/s08.html
 - type: cta
 - persuasion: Negative contrast (tableur) → Risk reversal (démonstration gratuite)
 - beat: motivation → urgency-to-act
